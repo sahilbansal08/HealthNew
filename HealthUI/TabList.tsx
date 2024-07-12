@@ -81,7 +81,6 @@ const TabList = () => {
     initializeHealth();
     if (isIos) {
       checkIOSHealthPermission();
-      // requestAuthorization();
       return;
     }
     checkAndroidHealthPermission();
