@@ -7,7 +7,7 @@ import {
   WeightRecord,
 } from 'react-native-health-connect/lib/typescript/types';
 import {TimeRangeFilter} from 'react-native-health-connect/lib/typescript/types/base.types';
-import { AndroidTypes, healthAndroidMethodsType } from './HealthUI/utils';
+import {healthAndroidMethodsType} from './utils';
 
 const readHealthData = async (
   type: RecordType,

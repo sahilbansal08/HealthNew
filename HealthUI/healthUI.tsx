@@ -2,11 +2,11 @@ import React from 'react';
 
 import {SafeAreaView} from 'react-native';
 
-import TabList from './HealthUI/TabList';
+import TabList from './TabList';
 
 const HealthUI = () => {
   return (
-    <SafeAreaView style={{backgroundColor: '#f7f7f7', flex: 1}}>
+    <SafeAreaView style={{backgroundColor: '#f6f7fb', flex: 1}}>
       <TabList />
     </SafeAreaView>
   );

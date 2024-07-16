@@ -4,11 +4,17 @@ import {healthMethods} from './iosHealthUtils';
 import {androidHealthMethods} from './androidHealthUtils';
 import {initialize} from 'react-native-health-connect';
 import moment from 'moment';
-import {AndroidTypes, IosTypes, types} from './HealthUI/utils';
+import {AndroidTypes, IosTypes, types} from './utils';
 
 const isIos = Platform.OS === 'ios';
 
-const useHealthData = () => {
+type HealthDataHookReturn = [
+  (type: types, startTime: string, endTime: string) => Promise<void>,
+  Record<string, unknown>,
+  boolean,
+];
+
+const useHealthData = (): HealthDataHookReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState({});
 

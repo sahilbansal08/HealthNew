@@ -1,25 +1,35 @@
+/* eslint-disable react/no-unstable-nested-components */
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   FlatList,
-  NativeEventEmitter,
-  NativeModules,
+  // NativeEventEmitter,
+  // NativeModules,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Image,
 } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import Tab from './tab';
 import appleHealthKit from 'react-native-health';
-import {androidPermissions, iosPermissions, isIos, types} from './utils';
-import useHealthData from '../useHealthData';
+import {
+  androidPermissions,
+  iosPermissions,
+  isIos,
+  sumValues,
+  types,
+  typesList,
+} from './utils';
+import useHealthData from './useHealthData';
 import moment from 'moment';
 import {SvgXML} from './svgXml';
 import {requestPermission} from 'react-native-health-connect';
 import {SvgXml} from 'react-native-svg';
+import DateBar from './DateBar';
 
 const TabList = () => {
-  const [date, setDate] = useState<moment.Moment>(moment());
+  const [date, setDate] = useState<string>(moment().toISOString());
   const now = moment(date).endOf('day');
   const [open, setOpen] = useState(false);
   const [getHealthData, results] = useHealthData();
@@ -40,7 +50,7 @@ const TabList = () => {
   };
 
   const getAllData = useCallback(() => {
-    types.forEach(element => {
+    typesList.forEach(element => {
       getHealthData(element, startDate.toISOString(), now.toISOString());
     });
   }, [getHealthData, now, startDate]);
@@ -57,7 +67,7 @@ const TabList = () => {
   };
 
   const getAndroidData = () => {
-    types.forEach(type => {
+    typesList.forEach(type => {
       getHealthData(type, startDate.toISOString(), now.toISOString());
     });
   };
@@ -70,7 +80,6 @@ const TabList = () => {
   useEffect(() => {
     if (isIos) {
       getAllData();
-      // writeStandTime(11, new Date().toISOString());
       return;
     }
     getAndroidData();
@@ -88,43 +97,49 @@ const TabList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (isIos) {
-      const listener = new NativeEventEmitter(
-        NativeModules.AppleHealthKit,
-      ).addListener('healthKit:HeartRate:new', async () => {
-        console.log('--> observer triggered');
-        getAllData();
-      });
-      return () => {
-        listener.remove();
-      };
-    }
-  }, [getAllData]);
+  // useEffect(() => {
+  //   if (isIos) {
+  //     const listener = new NativeEventEmitter(
+  //       NativeModules.AppleHealthKit,
+  //     ).addListener('healthKit:HeartRate:new', async () => {
+  //       console.log('--> observer triggered');
+  //       getAllData();
+  //     });
+  //     return () => {
+  //       listener.remove();
+  //     };
+  //   }
+  // }, [getAllData]);
 
-  const Item = ({item}) => {
+  const Item = ({item}: {item: types}) => {
     const data = results[item];
-
     return (
       <View style={styles.item}>
-        <Tab value={data?.[0]?.value} type={item} xml={SvgXML[item]} />
+        <Tab
+          value={
+            item === 'HeartRate'
+              ? data?.[data.length - 1]?.value
+              : sumValues(data)
+          }
+          type={item}
+          xml={SvgXML[item]}
+        />
       </View>
     );
   };
 
   return (
-    <View>
-      <View
-        style={{
-          backgroundColor: 'white',
-          padding: 10,
-          justifyContent: 'space-between',
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}>
-        <Text style={{fontSize: 22, color: 'black', fontWeight: '700'}}>
-          Welcome!
-        </Text>
+    <View style={{paddingHorizontal: 24, paddingVertical: 20}}>
+      <View style={styles.headerContainer}>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Image
+            source={{
+              uri: 'https://assets.api.uizard.io/api/cdn/stream/f1849d56-733e-495f-ae65-dc1da3ad55ba.jpg',
+            }}
+            style={styles.img}
+          />
+          <Text style={styles.headerTitle}>Hello, Tony Stark! </Text>
+        </View>
         <TouchableOpacity
           onPress={() => setOpen(true)}
           style={{marginLeft: 'auto'}}>
@@ -143,8 +158,9 @@ const TabList = () => {
         mode="date"
       />
       <View>
+        <DateBar date={now} setDate={setDate} />
         <FlatList
-          data={types}
+          data={typesList}
           renderItem={({item}) => <Item item={item} />}
           keyExtractor={item => item}
           numColumns={2}
@@ -162,13 +178,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 10,
   },
   row: {
     flex: 1,
+    gap: 16,
   },
   item: {
     flex: 1,
-    margin: 15,
+    marginBottom: 24,
   },
+  headerContainer: {
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 24,
+    color: '#030303',
+    fontWeight: '600',
+    marginLeft: 12,
+  },
+  img: {height: 40, width: 40, borderRadius: 20},
 });

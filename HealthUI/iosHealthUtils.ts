@@ -1,5 +1,5 @@
 import AppleHealthKit, {HealthUnit} from 'react-native-health';
-import {healthIosMethodsType} from './HealthUI/utils';
+import {healthIosMethodsType} from './utils';
 
 export interface Options {
   startDate: string;

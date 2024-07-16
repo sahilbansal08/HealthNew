@@ -1,26 +1,27 @@
 import {Platform} from 'react-native';
-import {HealthKitPermissions, HealthPermission} from 'react-native-health';
 import {
   Permission,
   RecordType,
 } from 'react-native-health-connect/lib/typescript/types';
-import {Options} from '../iosHealthUtils';
+import {Options} from './iosHealthUtils';
+import {HealthKitPermissions} from 'react-native-health';
+import moment from 'moment';
 
 const readAccessType = 'read';
 
 export const iosPermissions: HealthKitPermissions = {
   permissions: {
     read: [
-      HealthPermission.Weight,
-      HealthPermission.HeartRate,
-      HealthPermission.Steps,
-      HealthPermission.AppleExerciseTime,
-      HealthPermission.AppleExerciseTime,
-      HealthPermission.ActiveEnergyBurned,
+      'Weight',
+      'HeartRate',
+      'Steps',
+      'AppleExerciseTime',
+      'AppleExerciseTime',
+      'ActiveEnergyBurned',
     ],
     write: [],
   },
-};
+} as HealthKitPermissions;
 
 export const androidPermissions: Permission[] = [
   {
@@ -148,7 +149,77 @@ export type healthAndroidMethodsType = {
   >;
 };
 
-export const types = !isIos
+export function sumValues(data: any) {
+  return data?.reduce(
+    (sum: number, {value}: {value: number}) => sum + value,
+    0,
+  );
+}
+
+export function getWeekdays(startDate: moment.Moment, endDate: moment.Moment) {
+  let start = moment(startDate, 'YYYY-MM-DD');
+  let end = moment(endDate, 'YYYY-MM-DD');
+  let weekdays = [];
+  for (let date = start; date.isSameOrBefore(end); date.add(1, 'days')) {
+    weekdays.push({day: date.format('ddd'), date: date.format('YYYY-MM-DD')});
+  }
+  return weekdays;
+}
+
+export type returnType = {
+  [key in types]: string;
+};
+
+type DateRange = {
+  start: moment.Moment;
+  end: moment.Moment;
+};
+
+type DateRanges = {
+  W: DateRange;
+  M: DateRange;
+  '6M': DateRange;
+  Y: DateRange;
+};
+
+export function getDateRanges(): DateRanges {
+  const endMoment = moment().endOf('day');
+
+  const startOfWeek = moment().startOf('day').clone().subtract(6, 'days');
+
+  const startOfMonth = endMoment.clone().startOf('month');
+  const endOfMonth = endMoment.clone().endOf('month');
+
+  const startOfSixMonths = endMoment
+    .clone()
+    .subtract(6, 'months')
+    .startOf('month');
+  const endOfSixMonths = endMoment.clone().endOf('month');
+
+  const startOfYear = endMoment.clone().startOf('year');
+  const endOfYear = endMoment.clone().endOf('year');
+
+  return {
+    W: {
+      start: startOfWeek,
+      end: endMoment,
+    },
+    M: {
+      start: startOfMonth,
+      end: endOfMonth,
+    },
+    '6M': {
+      start: startOfSixMonths,
+      end: endOfSixMonths,
+    },
+    Y: {
+      start: startOfYear,
+      end: endOfYear,
+    },
+  };
+}
+
+export const typesList: types[] = !isIos
   ? ['Weight', 'Steps', 'TotalCaloriesBurned', 'HeartRate', 'ExerciseSession']
   : [
       'Weight',
