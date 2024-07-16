@@ -29,7 +29,6 @@ const FilterData = ({route}) => {
   const [getHealthData, results] = useHealthData();
   const date = getDateRanges()[type];
   const weekdays = getWeekdays(date.start, date.end);
-  console.log(results?.[route.params.type], 'here i am need');
   const getGraphData = () => {
     const data = weekdays.map(({date}) => {
       const steps = results?.[route.params.type]?.filter?.(({endDate}) => {
